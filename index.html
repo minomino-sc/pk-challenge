@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PKチャレンジ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>PKチャレンジゲーム</h1>
+
+<div id="game-area">
+  <div id="goal">
+    <div id="keeper"></div>
+    <div id="ball"></div>
+  </div>
+</div>
+
+<div id="controls">
+  <button onclick="shoot('左')">左</button>
+  <button onclick="shoot('中央')">中央</button>
+  <button onclick="shoot('右')">右</button>
+</div>
+
+<p id="score">あなた: 0 | CPU: 0</p>
+<p id="result"></p>
+<button id="resetBtn" onclick="resetGame()">再戦</button>
+
+<script src="script.js"></script>
+</body>
+</html>
