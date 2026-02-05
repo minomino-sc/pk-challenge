@@ -2,12 +2,71 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PKチャレンジ</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+  margin: 20px;
+}
+
+#game-area {
+  position: relative;
+  width: 90%;
+  max-width: 320px;
+  height: 200px;
+  margin: 20px auto;
+  border: 2px solid #333;
+  background: #cce5ff;
+  overflow: hidden;
+}
+
+#goal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#keeper {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: red;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  transition: left 0.5s ease;
+}
+
+#ball {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: yellow;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+}
+
+button {
+  padding: 14px 22px;
+  margin: 8px;
+  font-size: 18px;
+}
+
+#resetBtn {
+  display: none;
+  margin-top: 15px;
+}
+</style>
 </head>
+
 <body>
-<h1>PKチャレンジゲーム</h1>
+<h1>⚽ PKチャレンジ</h1>
 
 <div id="game-area">
   <div id="goal">
@@ -16,7 +75,7 @@
   </div>
 </div>
 
-<div id="controls">
+<div>
   <button onclick="shoot('左')">左</button>
   <button onclick="shoot('中央')">中央</button>
   <button onclick="shoot('右')">右</button>
@@ -26,6 +85,66 @@
 <p id="result"></p>
 <button id="resetBtn" onclick="resetGame()">再戦</button>
 
-<script src="script.js"></script>
+<script>
+let playerScore = 0;
+let cpuScore = 0;
+let kicks = 0;
+const maxKicks = 5;
+
+const ball = document.getElementById('ball');
+const keeper = document.getElementById('keeper');
+const scoreText = document.getElementById('score');
+const resultText = document.getElementById('result');
+const resetBtn = document.getElementById('resetBtn');
+
+const keeperPos = { 左: 10, 中央: 50, 右: 90 };
+const goalChance = { 左: 0.7, 中央: 0.8, 右: 0.6 };
+
+function shoot(direction) {
+  if (kicks >= maxKicks) return;
+
+  const choices = ['左','中央','右'];
+  const keeperChoice = choices[Math.floor(Math.random() * 3)];
+
+  keeper.style.left = keeperPos[keeperChoice] + '%';
+
+  ball.style.transition = 'bottom 0.8s ease, left 0.8s ease';
+  ball.style.left = keeperPos[direction] + '%';
+  ball.style.bottom = '100%';
+
+  setTimeout(() => {
+    if (keeperChoice === direction && Math.random() > goalChance[direction]) {
+      cpuScore++;
+      resultText.innerText = '失敗…キーパーに止められた！';
+    } else {
+      playerScore++;
+      resultText.innerText = 'ゴール！！🎉';
+    }
+
+    scoreText.innerText = `あなた: ${playerScore} | CPU: ${cpuScore}`;
+    kicks++;
+
+    ball.style.transition = 'none';
+    ball.style.bottom = '0';
+    ball.style.left = '50%';
+
+    if (kicks === maxKicks) {
+      if (playerScore > cpuScore) resultText.innerText += '\nあなたの勝ち！';
+      else if (playerScore < cpuScore) resultText.innerText += '\nあなたの負け…';
+      else resultText.innerText += '\n引き分け！';
+      resetBtn.style.display = 'inline-block';
+    }
+  }, 800);
+}
+
+function resetGame() {
+  playerScore = 0;
+  cpuScore = 0;
+  kicks = 0;
+  scoreText.innerText = 'あなた: 0 | CPU: 0';
+  resultText.innerText = '';
+  resetBtn.style.display = 'none';
+}
+</script>
 </body>
 </html>
