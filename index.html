@@ -3,79 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PKチャレンジ</title>
+<title>PKチャレンジ｜箕谷SC</title>
 
 <style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  text-align: center;
-  margin: 20px;
+:root {
+  --mino-main: #003366;
+  --mino-accent: #ffcc00;
 }
 
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+  background: #eef2f5;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+/* ゲームエリア（芝生） */
 #game-area {
   position: relative;
   width: 90%;
   max-width: 320px;
-  height: 200px;
+  height: 220px;
   margin: 20px auto;
-  border: 2px solid #333;
-  background: #cce5ff;
+  border: 2px solid #222;
   overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #2e8b57,
+      #2e8b57 10px,
+      #3cb371 10px,
+      #3cb371 20px
+    );
 }
 
+/* ゴール */
 #goal {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
 }
 
+.goal-post {
+  position: absolute;
+  background: white;
+}
+
+.goal-left {
+  width: 6px;
+  height: 120px;
+  left: 20px;
+  bottom: 20px;
+}
+
+.goal-right {
+  width: 6px;
+  height: 120px;
+  right: 20px;
+  bottom: 20px;
+}
+
+.goal-bar {
+  height: 6px;
+  left: 20px;
+  right: 20px;
+  bottom: 140px;
+}
+
+/* キーパー */
 #keeper {
   position: absolute;
   width: 40px;
   height: 40px;
-  background: red;
-  bottom: 0;
+  background: var(--mino-main);
+  border-radius: 50%;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  border-radius: 50%;
-  transition: left 0.5s ease;
+  transition: left 0.4s ease;
 }
 
+/* ボール */
 #ball {
   position: absolute;
   width: 20px;
   height: 20px;
-  background: yellow;
-  bottom: 0;
+  background: white;
+  border-radius: 50%;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  border-radius: 50%;
+  transition: bottom 0.4s ease, left 0.4s ease;
 }
 
-button {
-  padding: 14px 22px;
+/* 操作 */
+#controls button {
+  padding: 10px 18px;
   margin: 8px;
-  font-size: 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--mino-accent);
+}
+
+#score, #result {
+  margin-top: 10px;
+  font-size: 16px;
 }
 
 #resetBtn {
   display: none;
   margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
 }
 </style>
 </head>
 
 <body>
-<h1>⚽ PKチャレンジ</h1>
+
+<h1>⚽ PKチャレンジ（箕谷SC）</h1>
 
 <div id="game-area">
   <div id="goal">
+    <div class="goal-post goal-left"></div>
+    <div class="goal-post goal-right"></div>
+    <div class="goal-post goal-bar"></div>
+
     <div id="keeper"></div>
     <div id="ball"></div>
   </div>
 </div>
 
-<div>
+<div id="controls">
   <button onclick="shoot('左')">左</button>
   <button onclick="shoot('中央')">中央</button>
   <button onclick="shoot('右')">右</button>
@@ -89,62 +153,91 @@ button {
 let playerScore = 0;
 let cpuScore = 0;
 let kicks = 0;
-const maxKicks = 5;
+const maxKicks = 10;
+let suddenDeath = false;
 
-const ball = document.getElementById('ball');
 const keeper = document.getElementById('keeper');
+const ball = document.getElementById('ball');
 const scoreText = document.getElementById('score');
 const resultText = document.getElementById('result');
 const resetBtn = document.getElementById('resetBtn');
 
-const keeperPos = { 左: 10, 中央: 50, 右: 90 };
-const goalChance = { 左: 0.7, 中央: 0.8, 右: 0.6 };
-
 function shoot(direction) {
-  if (kicks >= maxKicks) return;
+  if (resetBtn.style.display === 'inline-block') return;
 
-  const choices = ['左','中央','右'];
-  const keeperChoice = choices[Math.floor(Math.random() * 3)];
+  kicks++;
 
-  keeper.style.left = keeperPos[keeperChoice] + '%';
+  const cpu = ['左','中央','右'][Math.floor(Math.random()*3)];
 
-  ball.style.transition = 'bottom 0.8s ease, left 0.8s ease';
-  ball.style.left = keeperPos[direction] + '%';
-  ball.style.bottom = '100%';
+  moveKeeper(cpu);
+  moveBall(direction);
 
-  setTimeout(() => {
-    if (keeperChoice === direction && Math.random() > goalChance[direction]) {
-      cpuScore++;
-      resultText.innerText = '失敗…キーパーに止められた！';
+  if (direction !== cpu) {
+    playerScore++;
+    resultText.innerText = 'GOAL!! 🎉';
+  } else {
+    cpuScore++;
+    resultText.innerText = 'セーブ… 😭';
+  }
+
+  scoreText.innerText = `あなた: ${playerScore} | CPU: ${cpuScore}`;
+
+  setTimeout(resetPositions, 600);
+
+  if (!suddenDeath && kicks === maxKicks) {
+    if (playerScore !== cpuScore) {
+      finishGame();
     } else {
-      playerScore++;
-      resultText.innerText = 'ゴール！！🎉';
+      suddenDeath = true;
+      resultText.innerText = 'サドンデス突入！🔥';
     }
+  }
 
-    scoreText.innerText = `あなた: ${playerScore} | CPU: ${cpuScore}`;
-    kicks++;
-
-    ball.style.transition = 'none';
-    ball.style.bottom = '0';
-    ball.style.left = '50%';
-
-    if (kicks === maxKicks) {
-      if (playerScore > cpuScore) resultText.innerText += '\nあなたの勝ち！';
-      else if (playerScore < cpuScore) resultText.innerText += '\nあなたの負け…';
-      else resultText.innerText += '\n引き分け！';
-      resetBtn.style.display = 'inline-block';
+  if (suddenDeath && kicks > maxKicks) {
+    if (playerScore !== cpuScore) {
+      finishGame();
     }
-  }, 800);
+  }
+}
+
+function moveKeeper(dir) {
+  if (dir === '左') keeper.style.left = '30%';
+  if (dir === '中央') keeper.style.left = '50%';
+  if (dir === '右') keeper.style.left = '70%';
+}
+
+function moveBall(dir) {
+  ball.style.bottom = '140px';
+  if (dir === '左') ball.style.left = '30%';
+  if (dir === '中央') ball.style.left = '50%';
+  if (dir === '右') ball.style.left = '70%';
+}
+
+function resetPositions() {
+  keeper.style.left = '50%';
+  ball.style.left = '50%';
+  ball.style.bottom = '20px';
+}
+
+function finishGame() {
+  if (playerScore > cpuScore) {
+    resultText.innerText += '\n勝利！！🎉';
+  } else {
+    resultText.innerText += '\n敗北…😢';
+  }
+  resetBtn.style.display = 'inline-block';
 }
 
 function resetGame() {
   playerScore = 0;
   cpuScore = 0;
   kicks = 0;
+  suddenDeath = false;
   scoreText.innerText = 'あなた: 0 | CPU: 0';
   resultText.innerText = '';
   resetBtn.style.display = 'none';
 }
 </script>
+
 </body>
 </html>
