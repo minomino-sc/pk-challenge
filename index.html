@@ -2,194 +2,178 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PKチャレンジ｜箕谷SC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>PK GAME - Minotani SC</title>
 
 <style>
-:root {
-  --mino-main:#003366;
-  --mino-accent:#ffcc00;
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  touch-action: manipulation;
 }
 
-body{
-  margin:0;
-  padding:15px;
-  font-family:sans-serif;
-  text-align:center;
-  background:#eef2f5;
+/* ===== ゲーム画面 ===== */
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
-h1{margin:5px 0 10px}
+/* ===== 背景 ===== */
+#stadium {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(to top, rgba(0,0,0,0.6), transparent 40%),
+    linear-gradient(#1e7f32 60%, #145a23);
+}
 
-/* 芝生 */
-#game{
-  position:relative;
-  width:95%;
-  max-width:360px;
-  height:250px;
-  margin:auto;
-  overflow:hidden;
-  border:2px solid #222;
-  background:repeating-linear-gradient(
-    90deg,#2e8b57,#2e8b57 12px,#3cb371 12px,#3cb371 24px
+/* 芝ライン */
+#stadium::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 2px,
+    transparent 2px,
+    transparent 20px
   );
 }
 
-/* ゴール */
-.post{position:absolute;background:white}
-.left{left:20px;bottom:35px;width:6px;height:120px}
-.right{right:20px;bottom:35px;width:6px;height:120px}
-.bar{left:20px;right:20px;bottom:155px;height:6px}
-
-/* ネット */
-#net{
-  position:absolute;
-  left:26px; right:26px; bottom:35px; height:120px;
-  background:
-    linear-gradient(#fff3 1px,transparent 1px),
-    linear-gradient(90deg,#fff3 1px,transparent 1px);
-  background-size:12px 12px;
-  opacity:.6;
-  transition:transform .25s ease;
+/* ===== ゴール ===== */
+#goal {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 80%;
+  height: 35%;
+  transform: translateX(-50%);
+  border: 4px solid #fff;
+  box-sizing: border-box;
 }
 
-/* キーパーSVG */
-#keeper{
-  position:absolute;
-  bottom:35px;
-  left:50%;
-  width:60px;
-  transform:translateX(-50%);
-  transition:transform .45s cubic-bezier(.2,.9,.2,1);
+/* ===== キーパー ===== */
+#keeper {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 60px;
+  height: 90px;
+  transform: translateX(-50%);
+  transition: all 0.4s ease-out;
 }
 
-/* ボール */
-#ball{
-  position:absolute;
-  width:18px;height:18px;
-  background:white;
-  border-radius:50%;
-  bottom:35px;left:50%;
-  transform:translateX(-50%);
+/* 人型SVG */
+#keeper svg {
+  width: 100%;
+  height: 100%;
 }
 
-/* 操作 */
-button{
-  padding:10px 18px;
-  margin:8px;
-  font-size:16px;
-  border:none;
-  border-radius:8px;
-  background:var(--mino-accent);
+/* ===== ボール ===== */
+#ball {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: all 0.6s cubic-bezier(.2,.8,.2,1);
 }
 
-#reset{display:none}
+/* ===== UI ===== */
+#ui {
+  position: absolute;
+  bottom: 5%;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+}
+
+#hint {
+  opacity: 0.8;
+  font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>⚽ PKチャレンジ（箕谷SC）</h1>
-
 <div id="game">
-  <div class="post left"></div>
-  <div class="post right"></div>
-  <div class="post bar"></div>
-  <div id="net"></div>
+  <div id="stadium"></div>
 
-  <!-- 人型キーパーSVG -->
-  <svg id="keeper" viewBox="0 0 100 120">
-    <circle cx="50" cy="20" r="12" fill="#ffd2a6"/>
-    <rect x="35" y="32" width="30" height="40" rx="8" fill="var(--mino-main)"/>
-    <rect x="20" y="40" width="15" height="35" rx="6" fill="var(--mino-main)"/>
-    <rect x="65" y="40" width="15" height="35" rx="6" fill="var(--mino-main)"/>
-    <rect x="40" y="72" width="10" height="30" fill="#000"/>
-    <rect x="50" y="72" width="10" height="30" fill="#000"/>
-  </svg>
+  <div id="goal">
+    <div id="keeper">
+      <!-- 人型キーパーSVG -->
+      <svg viewBox="0 0 60 90">
+        <circle cx="30" cy="15" r="10" fill="#222"/>
+        <rect x="20" y="25" width="20" height="30" fill="#0047ab"/>
+        <rect x="5" y="30" width="15" height="8" fill="#0047ab"/>
+        <rect x="40" y="30" width="15" height="8" fill="#0047ab"/>
+        <rect x="22" y="55" width="6" height="25" fill="#222"/>
+        <rect x="32" y="55" width="6" height="25" fill="#222"/>
+      </svg>
+    </div>
+  </div>
 
   <div id="ball"></div>
-</div>
 
-<div>
-  <button onclick="shoot('左')">左</button>
-  <button onclick="shoot('中央')">中央</button>
-  <button onclick="shoot('右')">右</button>
+  <div id="ui">
+    <div id="hint">画面をタップしてシュート</div>
+  </div>
 </div>
-
-<p id="score">あなた:0 | CPU:0</p>
-<p id="msg"></p>
-<button id="reset" onclick="resetGame()">再戦</button>
 
 <script>
-let p=0,c=0,k=0;
-const max=10;
-let sudden=false;
+const ball = document.getElementById("ball");
+const keeper = document.getElementById("keeper");
 
-const keeper=document.getElementById('keeper');
-const ball=document.getElementById('ball');
-const net=document.getElementById('net');
-const score=document.getElementById('score');
-const msg=document.getElementById('msg');
-const reset=document.getElementById('reset');
+let shooting = false;
 
-/* 効果音（Base64 超軽量） */
-const kick=new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
-const cheer=new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+document.body.addEventListener("touchstart", shoot);
+document.body.addEventListener("click", shoot);
 
-function shoot(dir){
- if(reset.style.display==="inline-block")return;
- k++;
- kick.play();
+function shoot() {
+  if (shooting) return;
+  shooting = true;
 
- const cpu=["左","中央","右"][Math.floor(Math.random()*3)];
- const speed=Math.random()*0.4+0.25;
+  // シュート先ランダム
+  const targetX = 20 + Math.random() * 60; // %
+  const targetY = 10 + Math.random() * 15; // %
 
- /* キーパー飛ぶ */
- if(cpu==="左") keeper.style.transform="translate(-110px,-20px) rotate(-35deg)";
- if(cpu==="右") keeper.style.transform="translate(60px,-20px) rotate(35deg)";
- if(cpu==="中央") keeper.style.transform="translateX(-50%) scale(1.1)";
+  // 速度ランダム
+  const speed = 400 + Math.random() * 300;
+  ball.style.transitionDuration = speed + "ms";
 
- /* ボール（カーブ） */
- ball.style.transition=`all ${speed}s ease-in`;
- ball.style.bottom="155px";
- ball.style.left=dir==="左"?"32%":dir==="右"?"68%":"50%";
+  // カーブ表現
+  ball.style.left = targetX + "%";
+  ball.style.bottom = "65%";
 
- setTimeout(()=>{
-   if(dir!==cpu){
-     p++; msg.innerText="GOAL!! ⚽🔥"; cheer.play();
-     net.style.transform="scaleY(1.08)";
-   }else{
-     c++; msg.innerText="セーブ… 🧤";
-   }
+  // キーパー動き
+  const keeperX = targetX + (Math.random() * 20 - 10);
+  keeper.style.left = keeperX + "%";
+  keeper.style.transform = "translateX(-50%) rotate(" + (keeperX > 50 ? 20 : -20) + "deg)";
 
-   score.innerText=`あなた:${p} | CPU:${c}`;
-   resetPos();
-
-   if(!sudden && k===max){
-     if(p!==c) end(); else {sudden=true; msg.innerText="🔥サドンデス🔥";}
-   }
-   if(sudden && k>max && p!==c) end();
- },speed*1000);
+  setTimeout(reset, 1200);
 }
 
-function resetPos(){
- keeper.style.transform="translateX(-50%)";
- ball.style.transition="none";
- ball.style.left="50%";
- ball.style.bottom="35px";
- setTimeout(()=>net.style.transform="scaleY(1)",200);
-}
+function reset() {
+  ball.style.transitionDuration = "0ms";
+  ball.style.left = "50%";
+  ball.style.bottom = "10%";
 
-function end(){
- msg.innerText+=p>c?"\n勝利🎉":"\n敗北😢";
- reset.style.display="inline-block";
-}
+  keeper.style.left = "50%";
+  keeper.style.transform = "translateX(-50%)";
 
-function resetGame(){
- p=c=k=0; sudden=false;
- score.innerText="あなた:0 | CPU:0";
- msg.innerText="";
- reset.style.display="none";
+  shooting = false;
 }
 </script>
 
